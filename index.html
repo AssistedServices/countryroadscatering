@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Country Roads Catering | South Coast Wedding & Event Caterers</title>
+  <meta name="description" content="Premium wedding and events catering on the South Coast. Locally sourced menus, flawless service, unforgettable food.">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --green:#2C3E36;
+      --cream:#F7F3EC;
+      --charcoal:#1A1A1A;
+      --gold:#C7A86B;
+      --sage:#B7C9A9;
+      --container: 1200px;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--cream);color:var(--charcoal)}
+    body{font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--container);margin-inline:auto;padding:clamp(16px,2vw,24px)}
+    .center{text-align:center}
+
+    .button{
+      display:inline-flex;align-items:center;justify-content:center;
+      height:48px;padding:0 22px;border-radius:999px;
+      background:var(--green);color:#fff;border:2px solid var(--green);
+      font-weight:600;letter-spacing:.2px;transition:.15s ease-in-out;
+    }
+    .button:hover{filter:brightness(1.05)}
+    .button--ghost{background:transparent;color:var(--green)}
+
+    h1,h2,h3{font-family:"Playfair Display",serif;line-height:1.2;color:var(--green);margin:0 0 .4em}
+    h1{font-size:clamp(2rem,5vw,3.5rem)}
+    h2{font-size:clamp(1.6rem,3vw,2.2rem)}
+    .subtitle{color:#3b4a44;max-width:55ch;margin-inline:auto}
+
+    /* Smooth scrolling with dynamic sticky-header offset */
+    html{
+      scroll-behavior:smooth;
+      --header-h:80px; /* fallback, JS updates this */
+      scroll-padding-top:calc(var(--header-h) + 8px);
+    }
+
+    /* ===== Portfolio Carousel ===== */
+    .carousel {
+      --h: clamp(160px, 26vw, 280px);         /* row height */
+      --gap: 16px;                            /* spacing between slides */
+      --speed: 60s;                           /* slower = bigger number */
+    }
+
+    .carousel__mask{
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: #fff;
+    }
+
+    /* subtle edge fade */
+    .carousel__mask::before,
+    .carousel__mask::after{
+      content:"";
+      position:absolute;top:0;bottom:0;width:64px;z-index:2;pointer-events:none;
+      -webkit-mask-image: linear-gradient(to right, black, transparent);
+      mask-image: linear-gradient(to right, black, transparent);
+      background: linear-gradient(to right, rgba(247,243,236,1), rgba(247,243,236,0));
+    }
+    .carousel__mask::before{left:0; transform: scaleX(1);}
+    .carousel__mask::after{right:0; transform: scaleX(-1);}
+
+    /* a track is a row that auto scrolls */
+    .carousel__track{
+      display: flex;
+      align-items: center;
+      gap: var(--gap);
+      padding: var(--gap);
+      height: var(--h);
+      animation: scroll-left var(--speed) linear infinite;
+    }
+    .carousel__track--rev{
+      animation-name: scroll-right;
+    }
+
+    /* pause on hover/focus within */
+    .carousel__mask:hover .carousel__track,
+    .carousel__mask:focus-within .carousel__track{
+      animation-play-state: paused;
+    }
+
+    .carousel__slide{
+      flex: 0 0 auto;
+      height: 100%;
+      aspect-ratio: 16 / 9;                  /* consistent card sizes */
+      border-radius: 14px;
+      overflow: hidden;
+      background:#ddd;
+    }
+    .carousel__slide img{
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    /* keyframes for the marquee effect */
+    @keyframes scroll-left{
+      from { transform: translateX(0); }
+      to   { transform: translateX(calc(-50% - var(--gap)/2)); }
+    }
+    @keyframes scroll-right{
+      from { transform: translateX(calc(-50% - var(--gap)/2)); }
+      to   { transform: translateX(0); }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .carousel__track{ animation: none; overflow-x: auto; scroll-snap-type: x mandatory; }
+      .carousel__slide{ scroll-snap-align: start; }
+    }
+    /* ===== Modal ===== */
+    .modal{position:fixed;inset:0;display:none;place-items:center;z-index:1000}
+    .modal[aria-hidden="false"]{display:grid}
+    .modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+    .modal__panel{
+      position:relative;z-index:1;background:#fff;max-width:min(520px,92%);width:100%;
+      border-radius:16px;box-shadow:var(--shadow);padding:clamp(18px,3vw,28px);
+    }
+    .modal__close{
+      position:absolute;top:8px;right:10px;border:none;background:transparent;
+      font-size:28px;line-height:1;color:#666;cursor:pointer
+    }
+    .modal__sub{margin:.25rem 0 1rem;color:#444}
+    .modal__label{display:block;font-weight:600;margin:.5rem 0 .25rem}
+    .modal__input{
+      width:100%;height:48px;border:1px solid #d8d8d8;border-radius:10px;padding:0 12px;font-size:1rem
+    }
+    .modal__input:focus{outline:2px solid var(--sage);border-color:var(--sage)}
+    .modal__error{color:#a40000;margin:.35rem 0 0;font-size:.9rem}
+    .modal__consent{display:flex;align-items:center;gap:.5rem;margin:.75rem 0}
+    .modal__hint{color:#666;font-size:.9rem;margin:.6rem 0 0}
+    .modal__status{margin-top:.6rem;font-size:.95rem}
+
+    /* Reduce motion? skip subtle zoom/transition */
+    @media (prefers-reduced-motion: no-preference){
+      .modal__panel{transform:scale(.98);opacity:0;transition:.18s ease}
+      .modal[aria-hidden="false"] .modal__panel{transform:scale(1);opacity:1}
+    }
+
+
+    /* ===== Header (no extra side padding) ===== */
+    header{
+      position:sticky;top:0;z-index:100;
+      background:rgba(247,243,236,.92);
+      backdrop-filter:saturate(150%) blur(8px);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .nav{
+      max-width:var(--container);
+      margin-inline:auto;
+      padding-block:10px;                 /* vertical only */
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .nav__brand{display:flex;align-items:center}
+    .nav__brand img{height:200px;width:auto;display:block} /* swap src below */
+    @media (max-width:600px){.nav__brand img{height:56px}}
+
+    .nav__menu{display:flex;gap:1rem;flex-wrap:wrap}
+    .nav__menu a{padding:.6rem .8rem;border-radius:999px}
+    .nav__menu a:hover{background:rgba(44,62,54,.08)}
+
+    /* ===== Hero ===== */
+    .hero{
+      position:relative;min-height:72vh;display:grid;align-items:end;color:#fff;
+      background:
+        linear-gradient(0deg, rgba(44,62,54,.65), rgba(44,62,54,.25)),
+        url("images/portfolio-8.jpg") center/cover no-repeat; /* <-- replace if needed */
+    }
+    .hero__panel{
+      margin:clamp(16px,3vw,32px);
+      background:rgba(247,243,236,.92);color:var(--charcoal);
+      border-radius:var(--radius);max-width:min(560px,95%);
+      padding:clamp(18px,2.5vw,28px);box-shadow:var(--shadow);
+    }
+    .eyebrow{font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;font-size:.8rem}
+
+    /* ===== Sections ===== */
+    section{padding:clamp(40px,6vw,80px) 0}
+    .alt{background:#f0f3ef}
+
+    /* ===== Grids/Cards ===== */
+    .grid{display:grid;gap:clamp(16px,2vw,24px)}
+    .grid--3{grid-template-columns:repeat(1,1fr)}
+    @media (min-width:780px){.grid--3{grid-template-columns:repeat(3,1fr)}}
+    .card{background:#fff;border-radius:var(--radius);padding:clamp(18px,2vw,24px);box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.05)}
+
+    /* Menu highlights – per-row grid (fixed badge + flexible text) */
+    .menu-highlights { 
+      display: grid;
+      row-gap: 12px;                 /* space between rows */
+    }
+
+    .menu-highlights .item{
+      display: grid;
+      grid-template-columns: 115px 1fr;   /* left col fixed, right col flexible */
+      column-gap: 18px;
+      align-items: center;                /* vertical centering */
+    }
+
+    /* Badge cell (left column) */
+    .menu-highlights .badge{
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;                        /* fill the fixed 115px column */
+      background: var(--sage);
+      color: #123;
+      padding: .35rem .6rem;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Text cell (right column) */
+    .menu-highlights .item p{
+      margin: 0;
+    }
+
+    /* Mobile: let the badge column shrink a touch */
+    @media (max-width: 600px){
+      .menu-highlights .item{
+        grid-template-columns: minmax(96px, 32%) 1fr;
+        column-gap: 14px;
+      }
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap; /* wraps nicely on mobile */
+    }
+
+    .footer-left p,
+    .footer-right p {
+      margin: 0;
+    }
+
+
+    /* Contact alignment */
+    #contact .container{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+    #contact .cta-row{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}
+
+    /* Footer */
+    footer{background:var(--green);color:#fff}
+    footer a{color:#fff;opacity:1}
+  </style>
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header>
+    <div class="nav">
+      <a class="nav__brand" href="#top">
+        <!-- Replace with your hosted logo image -->
+        <img src="images/Main Logo Transparant.png" alt="Country Roads Catering logo">
+      </a>
+      <nav class="nav__menu" aria-label="Primary">
+        <a href="#services">Services</a>
+        <a href="#menu">Menu</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="top" role="banner" aria-label="Hero">
+    <div class="hero__panel">
+      <div class="eyebrow">South Coast, UK • Weddings & Events</div>
+      <h1>Elevate Every Occasion</h1>
+      <p class="subtitle">
+        Celebrate life’s most important moments with unforgettable food.
+        At Country Roads Catering, we combine two decades of culinary expertise with a passion for flawless service.
+        From weddings and private gatherings to large-scale events, our locally-sourced menus are crafted to impress and designed to delight.
+      </p>
+      <div class="cta-row" style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem">
+        <a href="#contact" class="button">Plan Your Event</a>
+        <a href="#menu" class="button button--ghost">View Our Menu</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Services ===== -->
+  <section id="services" class="alt">
+    <div class="container center">
+      <h2>Our Catering Services</h2>
+      <p class="subtitle">Tailored options for weddings, private dining, and corporate events.</p>
+      <div class="grid grid--3" style="margin-top:1.5rem">
+        <article class="card">
+          <h3>Weddings</h3>
+          <p>Elegant, romantic, and unforgettable. We’ll create a dining experience worthy of your big day, from champagne canapés to late-night bites.</p>
+        </article>
+        <article class="card">
+          <h3>Private Events</h3>
+          <p>Birthdays, anniversaries, or intimate dinners — our bespoke menus bring restaurant-quality food to your table, wherever you are.</p>
+        </article>
+        <article class="card">
+          <h3>Corporate</h3>
+          <p>Impress clients, reward your team, or host with style. Our corporate catering combines professionalism with outstanding flavour.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Menu highlights ===== -->
+  <section id="menu">
+    <div class="container">
+      <h2 class="center">Menu Highlights</h2>
+      <p class="subtitle center">Plated dining • Canapés • BBQ & Feasts</p>
+      <div class="grid" style="margin-top:1.25rem">
+        <div class="card menu-highlights">
+          <div class="item"><span class=></span><p><b>We believe food should be as memorable as the occasion. Imagine your menu including dishes like these.</b></p></div>
+          <div class="item"><span class="badge">Canapés</span><p>Smoked duck and fig · Blistered padron peppers · Free range pork scotch egg · Apple and BBQ pork belly · Jerk Chicken and pineapple</p></div>
+          <div class="item"><span class="badge">Starter</span><p>Pan‑seared scallops · garden pea purée · honey bacon</p></div>
+          <div class="item"><span class="badge">Main</span><p>Slow‑cooked lamb shoulder · pressed dauphinoise · port & shallot jus</p></div>
+          <div class="item"><span class="badge">Dessert</span><p>New York vanilla cheesecake · raspberry compote · white chocolate sauce</p></div>
+        </div>
+      </div>
+      <p class="center" style="margin-top:1rem">
+        <button id="requestMenuBtn" class="button button--ghost" type="button">
+          Request Full Menu (PDF)
+        </button>
+      </p>      
+    </div>
+  </section>
+
+  <!-- ===== Portfolio Carousel ===== -->
+  <section id="portfolio" aria-label="Event Portfolio" class="alt">
+    <div class="container">
+      <h2 class="center" style="margin-bottom: 10px;">Our Work</h2>
+      <p class="subtitle center" style="margin-bottom: 18px;">A few moments we’ve catered recently</p>
+
+      <div class="carousel" aria-hidden="false">
+        <div class="carousel__mask">
+          <!-- Track 1 (leftward) -->
+          <ul class="carousel__track" aria-label="Scrolling gallery">
+            <!-- Replace src with your images (landscape works best ~ 3:2 or 16:9) -->
+            <li class="carousel__slide"><img src="images/portfolio-1.jpg" alt="Evening buffet table" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-2.jpg" alt="Succulent hog roast" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-3.jpg" alt="Ham and pear canapés" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-4.jpg" alt="Fish main dish" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-5.jpg" alt="Evening buffet table" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-6.jpg" alt="BBQ platter" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-7.jpg" alt="Grazing stack" loading="lazy"></li>
+
+            <!-- Duplicates for seamless loop (leave as-is) -->
+            <li class="carousel__slide"><img src="images/portfolio-1.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-2.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-3.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-4.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-5.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-6.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-7.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+          </ul>
+
+          <!-- Track 2 (rightward, optional second row) -->
+          <ul class="carousel__track carousel__track--rev" aria-label="Scrolling gallery">
+            <li class="carousel__slide"><img src="images/portfolio-8.jpg" alt="Indoor wedding dinner" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-9.jpg" alt="Wine and canapés" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-10.jpg" alt="Vegeterian platter" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-11.jpg" alt="Chocolate Brownie desserts" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-12.jpg" alt="Sopley Tart desserts" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-13.jpg" alt="Chef setting up grazing table" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-14.jpg" alt="Drinks package" loading="lazy"></li>
+
+            <!-- Duplicates -->
+            <li class="carousel__slide"><img src="images/portfolio-8.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-9.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-10.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-11.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-12.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-13.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+            <li class="carousel__slide"><img src="images/portfolio-14.jpg" alt="" aria-hidden="true" loading="lazy"></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section id="contact">
+    <div class="container center">
+      <h2>Let’s Start Planning</h2>
+      <p class="subtitle">Tell us about your date, venue, and guest count. We’ll work with you to come up with a plan.</p>
+      <div class="cta-row">
+        <a class="button" href="mailto:michael@assist.wtf?subject=Country%20Roads%20Catering%20Enquiry">Email Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer role="contentinfo">
+    <div class="container footer">
+      <div class="footer-left">
+        <p style="margin:0">© <span id="y"></span> Country Roads Catering • South Coast, UK</p>
+        <p style="margin:0">
+          <a href="https://www.assist.wtf" target="_blank" rel="noopener noreferrer">
+            Designed, Built, Deployed &amp; Automated by Assist.wtf
+          </a>
+        </p>
+      </div>
+      <div class="footer-right">
+        <p style="margin:0">
+          <a href="#">Privacy</a> · <a href="#">Accessibility</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+
+
+  <script>
+    // Update copyright year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Keep anchor offset in sync with sticky header height
+    function setHeaderOffset(){
+      const h = document.querySelector('header');
+      if (!h) return;
+      document.documentElement.style.setProperty('--header-h', h.getBoundingClientRect().height + 'px');
+    }
+    setHeaderOffset();
+    addEventListener('load', setHeaderOffset);
+    addEventListener('resize', setHeaderOffset);
+    addEventListener('scroll', setHeaderOffset, {passive:true});
+  </script>
+  <!-- ===== Request Menu Modal ===== -->
+  <div class="modal" id="menuModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="menuModalTitle">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="document">
+      <button class="modal__close" type="button" title="Close" aria-label="Close" data-close>×</button>
+      <h3 id="menuModalTitle">Request the Full Menu (PDF)</h3>
+      <p class="modal__sub">Pop in your email and we’ll start the download.</p>
+      <form id="menuRequestForm" novalidate>
+        <label for="menuEmail" class="modal__label">Email address</label>
+        <input id="menuEmail" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com" class="modal__input" />
+        <p id="menuEmailError" class="modal__error" role="alert" hidden>Please enter a valid email.</p>
+
+        <!-- Optional note / consent line -->
+        <label class="modal__consent">
+          <input type="checkbox" id="menuConsent" />
+          <span>Send me occasional updates about seasonal menus.</span>
+        </label>
+
+        <button class="button" type="submit" id="menuSubmitBtn">Get the PDF</button>
+        <p class="modal__hint">We’ll email a notification to our team and immediately download the PDF for you.</p>
+        <p class="modal__status" id="menuStatus" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const btnOpen = document.getElementById('requestMenuBtn');
+      const modal = document.getElementById('menuModal');
+      const btnsClose = modal.querySelectorAll('[data-close]');
+      const form = document.getElementById('menuRequestForm');
+      const emailInput = document.getElementById('menuEmail');
+      const errorEl = document.getElementById('menuEmailError');
+      const statusEl = document.getElementById('menuStatus');
+      const submitBtn = document.getElementById('menuSubmitBtn');
+    
+      const MENU_PDF_URL = 'menu.pdf'; // <- change if needed
+      const FORMSPREE_ENDPOINT = '/api/menu-request';
+    
+      function openModal(){
+        modal.setAttribute('aria-hidden','false');
+        setTimeout(()=> emailInput.focus(), 50);
+        // prevent background scroll
+        document.documentElement.style.overflow = 'hidden';
+      }
+      function closeModal(){
+        modal.setAttribute('aria-hidden','true');
+        document.documentElement.style.overflow = '';
+        form.reset();
+        errorEl.hidden = true;
+        statusEl.hidden = true;
+      }
+    
+      btnOpen?.addEventListener('click', openModal);
+      btnsClose.forEach(b => b.addEventListener('click', closeModal));
+      modal.addEventListener('click', (e)=>{ if (e.target.dataset.close !== undefined) closeModal(); });
+      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal(); });
+    
+      function validEmail(v){
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+      }
+    
+      async function notifyAndDownload(email){
+        // Send to Formspree (emails you the submission)
+        const payload = {
+          email,
+          consent: document.getElementById('menuConsent').checked ? 'yes' : 'no',
+          source: 'menu_request'
+        };
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        statusEl.hidden = true;
+    
+        try {
+          const res = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Accept':'application/json', 'Content-Type':'application/json' },
+            body: JSON.stringify(payload),
+          });
+    
+          // Success → trigger download
+          if (res.ok) {
+            // Trigger download without navigating away
+            const a = document.createElement('a');
+            a.href = MENU_PDF_URL;
+            a.download = ''; // hint to download
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+    
+            // UX feedback
+            statusEl.textContent = 'Thanks! Your download should begin shortly.';
+            statusEl.hidden = false;
+            closeModal();
+          } else {
+            statusEl.textContent = 'Hmm, something went wrong. Please try again in a moment.';
+            statusEl.hidden = false;
+          }
+        } catch(err){
+          statusEl.textContent = 'Network error. Please try again.';
+          statusEl.hidden = false;
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Get the PDF';
+        }
+      }
+    
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const email = emailInput.value || '';
+        if (!validEmail(email)) {
+          errorEl.hidden = false;
+          emailInput.focus();
+          return;
+        }
+        errorEl.hidden = true;
+        notifyAndDownload(email);
+      });
+    })();
+    </script>
+    
+
+</body>
+</html>
