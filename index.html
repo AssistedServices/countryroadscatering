@@ -467,30 +467,28 @@
 
   <script>
     (function(){
-      const btnOpen = document.getElementById('requestMenuBtn');
-      const modal = document.getElementById('menuModal');
+      const btnOpen   = document.getElementById('requestMenuBtn');
+      const modal     = document.getElementById('menuModal');
       const btnsClose = modal.querySelectorAll('[data-close]');
-      const form = document.getElementById('menuRequestForm');
-      const emailInput = document.getElementById('menuEmail');
-      const errorEl = document.getElementById('menuEmailError');
-      const statusEl = document.getElementById('menuStatus');
+      const form      = document.getElementById('menuRequestForm');
+      const emailInput= document.getElementById('menuEmail');
+      const errorEl   = document.getElementById('menuEmailError');
+      const statusEl  = document.getElementById('menuStatus');
       const submitBtn = document.getElementById('menuSubmitBtn');
+      const consentEl = document.getElementById('menuConsent');
     
-      const MENU_PDF_URL = 'menu.pdf'; // <- change if needed
-      const FORMSPREE_ENDPOINT = '/api/menu-request';
+      const API_ENDPOINT  = '/api/menu-request';
+      const FALLBACK_PDF  = '/files/menu.pdf'; // keep a public copy here
     
       function openModal(){
         modal.setAttribute('aria-hidden','false');
         setTimeout(()=> emailInput.focus(), 50);
-        // prevent background scroll
         document.documentElement.style.overflow = 'hidden';
       }
       function closeModal(){
         modal.setAttribute('aria-hidden','true');
         document.documentElement.style.overflow = '';
-        form.reset();
-        errorEl.hidden = true;
-        statusEl.hidden = true;
+        form.reset(); errorEl.hidden = true; statusEl.hidden = true;
       }
     
       btnOpen?.addEventListener('click', openModal);
@@ -498,68 +496,52 @@
       modal.addEventListener('click', (e)=>{ if (e.target.dataset.close !== undefined) closeModal(); });
       window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal(); });
     
-      function validEmail(v){
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-      }
+      const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v||'').trim());
     
       async function notifyAndDownload(email){
-        // Send to Formspree (emails you the submission)
-        const payload = {
-          email,
-          consent: document.getElementById('menuConsent').checked ? 'yes' : 'no',
-          source: 'menu_request'
-        };
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-        statusEl.hidden = true;
+        submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; statusEl.hidden = true;
     
         try {
-          const res = await fetch(FORMSPREE_ENDPOINT, {
+          const resp = await fetch(API_ENDPOINT, {
             method: 'POST',
-            headers: { 'Accept':'application/json', 'Content-Type':'application/json' },
-            body: JSON.stringify(payload),
+            headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify({
+              email,
+              marketingOptIn: !!consentEl.checked   // <-- backend expects boolean
+            })
           });
     
-          // Success → trigger download
-          if (res.ok) {
-            // Trigger download without navigating away
-            const a = document.createElement('a');
-            a.href = MENU_PDF_URL;
-            a.download = ''; // hint to download
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+          const data = await resp.json().catch(()=>({}));
+          if (!resp.ok || !data.ok) throw new Error(data.error || 'Request failed');
     
-            // UX feedback
-            statusEl.textContent = 'Thanks! Your download should begin shortly.';
-            statusEl.hidden = false;
-            closeModal();
-          } else {
-            statusEl.textContent = 'Hmm, something went wrong. Please try again in a moment.';
-            statusEl.hidden = false;
-          }
-        } catch(err){
+          // Prefer server-provided path, else fallback
+          const url = data.download || FALLBACK_PDF;
+    
+          // trigger download without navigation
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = ''; document.body.appendChild(a); a.click(); a.remove();
+    
+          closeModal();
+        } catch (err) {
           statusEl.textContent = 'Network error. Please try again.';
           statusEl.hidden = false;
+          console.error(err);
         } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Get the PDF';
+          submitBtn.disabled = false; submitBtn.textContent = 'Get the PDF';
         }
       }
     
-      form.addEventListener('submit', function(e){
+      form.addEventListener('submit', (e)=>{
         e.preventDefault();
-        const email = emailInput.value || '';
-        if (!validEmail(email)) {
-          errorEl.hidden = false;
-          emailInput.focus();
-          return;
-        }
+        const email = emailInput.value;
+        if (!isEmail(email)) { errorEl.hidden = false; emailInput.focus(); return; }
         errorEl.hidden = true;
         notifyAndDownload(email);
       });
     })();
     </script>
+    
     
 
 </body>
