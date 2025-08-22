@@ -675,7 +675,60 @@
     })();
     </script>
     
-    
+    <!-- ===== Booking Banner ===== -->
+<div id="bookingBanner" class="banner" aria-live="polite">
+  <p>🌸 Now taking bookings for Spring 2026</p>
+  <button id="bannerClose" aria-label="Close banner">×</button>
+</div>
+
+<style>
+  .banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--green);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000;
+    transition: transform .35s ease;
+    max-width: 90%;
+    font-weight: 600;
+  }
+  .banner.show { transform: translateX(-50%) translateY(0); }
+  .banner button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+</style>
+
+<script>
+  (function(){
+    const banner = document.getElementById('bookingBanner');
+    const closeBtn = document.getElementById('bannerClose');
+    const KEY = 'crc-booking-banner-dismissed';
+
+    // Only show if not dismissed before
+    if (!localStorage.getItem(KEY)) {
+      requestAnimationFrame(() => banner.classList.add('show'));
+    }
+
+    closeBtn.addEventListener('click', () => {
+      banner.classList.remove('show');
+      localStorage.setItem(KEY, '1');
+    });
+  })();
+</script>
+
 
 </body>
 </html>
