@@ -5,7 +5,7 @@ import html
 
 app = FastAPI()
 
-RECIPIENT = "michael@assist.wtf"   # <-- where notifications go
+RECIPIENT = "hello@countryroadscatering.co.uk"   # <-- where notifications go
 SENDER    = "no-reply@countryroadscatering.co.uk"  # must exist/relay via postfix
 
 class MenuRequest(BaseModel):
