@@ -35,13 +35,10 @@
     /* Filter bar */
     .filters{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
     .chip{
-      display:inline-flex;align-items:center;gap:8px;
+      display:inline-flex;align-items:center;
       padding:.4rem .75rem;border-radius:999px;border:1px solid #cfd7d2;background:#fff;cursor:pointer;font-weight:600;font-size:.9rem;
     }
-    .chip input{appearance:none; width:0; height:0; position:absolute; opacity:0}
     .chip.active{background:var(--sage);border-color:var(--sage)}
-    .chip .x{display:none}
-    .chip.active .x{display:inline}
 
     /* Gallery cards + captions */
     .gallery{display:grid;gap:14px}
@@ -120,7 +117,7 @@
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ---- Portfolio data: src, caption, tags (edit freely)
+    // ---- Portfolio data
     const ITEMS = [
       {src:"images/portfolio-1.jpg",  cap:"Evening buffet table",               tags:["Buffet","Evening","Indoor"]},
       {src:"images/portfolio-2.jpg",  cap:"Succulent hog roast",                tags:["BBQ","Mains","Outdoor"]},
@@ -138,88 +135,102 @@
       {src:"images/portfolio-14.jpg", cap:"Drinks package",                     tags:["Drinks","Weddings"]}
     ];
 
-    // Build tag list (sorted, unique)
+    // util: get 'portfolio-12.jpg' from 'images/portfolio-12.jpg'
+    const basename = (p) => p.split('/').pop();
+
+    // Build tag list
     const TAGS = [...new Set(ITEMS.flatMap(i => i.tags))].sort((a,b)=>a.localeCompare(b));
-    const active = new Set(); // selected tags
+
+    // SINGLE‑SELECT state
+    let activeTag = null; // null = All
+
     const filtersEl = document.getElementById('filters');
     const galleryEl = document.getElementById('gallery');
     const emptyEl = document.getElementById('empty');
 
-    // Render filter chips
-    function renderFilters(){
-      filtersEl.innerHTML = '';
-      // "All" chip to clear quickly
-      const all = chip("All", !active.size, () => { active.clear(); render(); });
-      filtersEl.appendChild(all);
-      TAGS.forEach(tag => {
-        const isActive = active.has(tag);
-        const el = chip(tag, isActive, () => {
-          isActive ? active.delete(tag) : active.add(tag);
-          render();
-        });
-        filtersEl.appendChild(el);
-      });
-    }
+    // Chip component
     function chip(label, isActive, onClick){
       const c = document.createElement('button');
       c.type = 'button';
-      c.className = 'chip' + (isActive ? ' active':'');
-      c.innerHTML = `<span>${label}</span><span class="x">×</span>`;
+      c.className = 'chip' + (isActive ? ' active' : '');
+      c.textContent = label;
       c.addEventListener('click', onClick);
       return c;
     }
 
-    // Current filtered list + mapping back to ITEMS index for lightbox navigation
-    let filtered = ITEMS.map((it,i)=>({i, ...it}));
-
-    function getFiltered(){
-      if (!active.size) return ITEMS.map((it,i)=>({i, ...it}));
-      return ITEMS.map((it,i)=>({i, ...it}))
-                  .filter(row => row.tags.some(t => active.has(t)));
+    // Render filter chips (single‑select)
+    function renderFilters(){
+      filtersEl.innerHTML = '';
+      filtersEl.appendChild(chip("All", activeTag === null, () => {
+        activeTag = null; render();
+      }));
+      TAGS.forEach(tag => {
+        const isActive = activeTag === tag;
+        filtersEl.appendChild(chip(tag, isActive, () => {
+          activeTag = isActive ? null : tag; // clicking active clears to All
+          render();
+        }));
+      });
     }
+
+    // Filtered list
+    function getFiltered(){
+      const rows = ITEMS.map((it,i)=>({i, ...it}));
+      if (!activeTag) return rows;
+      return rows.filter(row => row.tags.includes(activeTag));
+    }
+
+    let filtered = getFiltered();
 
     // Render gallery
     function render(){
       filtered = getFiltered();
       galleryEl.innerHTML = '';
-      if (filtered.length === 0){
-        emptyEl.hidden = false;
-        return;
-      }
-      emptyEl.hidden = true;
+      emptyEl.hidden = filtered.length !== 0;
 
       filtered.forEach((row, idx) => {
         const a = document.createElement('a');
-        a.href = `our-work.html?img=${encodeURIComponent(row.src)}#open`;
+        a.href = `/our-work/${basename(row.src)}`; // pretty path
         a.className = 'card';
+
         const img = document.createElement('img');
         img.src = row.src; img.loading = 'lazy'; img.alt = row.cap || 'Portfolio image';
+
         const cap = document.createElement('div');
         cap.className = 'cap';
         cap.textContent = row.cap || '';
+
         a.appendChild(img); a.appendChild(cap);
         galleryEl.appendChild(a);
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
           openLightbox(idx); // idx within filtered set
-          history.replaceState(null, "", `our-work.html?img=${encodeURIComponent(row.src)}#open`);
+          history.pushState({ img: row.src }, "", `/our-work/${basename(row.src)}`);
         });
       });
+      // If a lightbox is open and the current image was filtered out, close it
+      if (lb.getAttribute('aria-hidden') === 'false') {
+        const slug = location.pathname.replace(/^\/our-work\/?/, '');
+        if (slug && slug.includes('.')) {
+          const stillVisible = filtered.some(r => basename(r.src) === slug);
+          if (!stillVisible) closeLightbox();
+        }
+      }
     }
 
-    // Lightbox
+    // Lightbox (with caption), respecting current filters
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightboxImg');
     const lbCap = document.getElementById('lightboxCap');
     const btnClose = lb.querySelector('.lightbox__close');
     const btnPrev = lb.querySelector('.lightbox__prev');
     const btnNext = lb.querySelector('.lightbox__next');
-    let fidx = 0; // index within filtered array
+    let fidx = 0;
 
     function openLightbox(i){
       filtered = getFiltered();
-      if (filtered.length === 0) return;
+      if (!filtered.length) return;
       fidx = (i + filtered.length) % filtered.length;
       const row = filtered[fidx];
       lbImg.src = row.src;
@@ -231,38 +242,51 @@
     function closeLightbox(){
       lb.setAttribute('aria-hidden','true');
       document.documentElement.style.overflow = '';
-      if (location.hash === '#open') history.replaceState(null, "", 'our-work.html');
+      if (location.pathname.startsWith('/our-work/')) {
+        history.pushState({}, "", '/our-work');
+      }
     }
-    function next(){ openLightbox(fidx+1); }
-    function prev(){ openLightbox(fidx-1); }
+    function next(){
+      openLightbox(fidx+1);
+      history.replaceState({img: filtered[fidx].src}, "", `/our-work/${basename(filtered[fidx].src)}`);
+    }
+    function prev(){
+      openLightbox(fidx-1);
+      history.replaceState({img: filtered[fidx].src}, "", `/our-work/${basename(filtered[fidx].src)}`);
+    }
 
     btnClose.addEventListener('click', closeLightbox);
     btnNext.addEventListener('click', next);
     btnPrev.addEventListener('click', prev);
     lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
-    window.addEventListener('keydown', (e)=> {
-      if (lb.getAttribute('aria-hidden')==='false'){
-        if (e.key==='Escape') closeLightbox();
-        if (e.key==='ArrowRight') next();
-        if (e.key==='ArrowLeft') prev();
+
+    // Back/forward buttons
+    window.addEventListener('popstate', () => {
+      const slug = location.pathname.replace(/^\/our-work\/?/, '');
+      if (slug && slug.includes('.')) {
+        const iInItems = ITEMS.findIndex(it => basename(it.src) === slug);
+        if (iInItems >= 0) {
+          const fIndex = getFiltered().findIndex(row => row.i === iInItems);
+          if (fIndex >= 0) { openLightbox(fIndex); return; }
+        }
       }
+      closeLightbox();
     });
 
     // Boot
     renderFilters();
     render();
 
-    // Deep-link: open specific image, respecting current filters
-    const params = new URLSearchParams(location.search);
-    const deep = params.get('img');
-    if (deep){
-      const indexInItems = ITEMS.findIndex(s => s.src === deep || s.src.endsWith('/'+deep));
-      if (indexInItems >= 0){
-        // map to filtered index
-        const fIndex = getFiltered().findIndex(row => row.i === indexInItems);
+    // Deep‑link on initial load: /our-work/<filename>
+    (function openFromPath(){
+      const slug = location.pathname.replace(/^\/our-work\/?/, '');
+      if (!slug || !slug.includes('.')) return;
+      const iInItems = ITEMS.findIndex(it => basename(it.src) === slug);
+      if (iInItems >= 0){
+        const fIndex = getFiltered().findIndex(row => row.i === iInItems);
         if (fIndex >= 0) openLightbox(fIndex);
       }
-    }
+    })();
   </script>
 </body>
 </html>
